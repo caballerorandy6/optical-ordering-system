@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth (Better Auth: user, session, account, verification) ───
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // admin plugin
+  role          String?   @default("STAFF") // ADMIN | STAFF
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+
+  sessions  Session[]
+  accounts  Account[]
+  orders    Order[]
+  payments  Payment[]
+  auditLogs AuditLog[]
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  impersonatedBy String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}
+
+// ─── Dominio: óptica (derivado del formulario físico) ───
+
+enum OrderStatus {
+  ABIERTA
+  LISTA
+  ENTREGADA
+  CANCELADA
+}
+
+enum Eye {
+  OD // ojo derecho (R en la hoja)
+  OS // ojo izquierdo (L en la hoja)
+}
+
+enum LensType {
+  SV // single vision
+  BIFOCAL
+  TRIFOCAL
+  PROGRESSIVE
+}
+
+enum LensMaterial {
+  PLASTIC
+  GLASS
+  POLY
+  HI_INDEX
+  TRANSIT
+}
+
+enum LensTreatment {
+  AR_COAT
+  POLY_BLUE_AR
+  TINT
+  EDGE_DRILL
+  POLY_H_INDEX
+  TRANSITIONS
+}
+
+enum LensColorStyle {
+  GRADIENT
+  SOLID
+}
+
+enum FrameType {
+  METAL
+  ZYL
+  RIMLESS
+}
+
+enum ChargeConcept {
+  EXAM
+  LENSES
+  FRAME
+  CONTACT_LENSES
+  AR
+  TINT
+  EDGE_DRILL
+  TRANSITIONS
+  OTRO
+}
+
+enum PaymentMethod {
+  CASH
+  VISA
+  MC
+  AMEX
+  DISCOVER
+  DEBIT
+}
+
+model Customer {
+  id              String    @id @default(cuid())
+  nombre          String
+  apellido        String
+  telefono        String?
+  celular         String?
+  direccion       String?
+  fechaNacimiento DateTime?
+  notas           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  orders          Order[]
+
+  @@index([nombre, apellido])
+  @@index([telefono])
+  @@index([celular])
+}
+
+model Order {
+  id                     String      @id @default(cuid())
+  folio                  Int         @unique @default(autoincrement())
+  customerId             String
+  customer               Customer    @relation(fields: [customerId], references: [id])
+  userId                 String // Sold By
+  user                   User        @relation(fields: [userId], references: [id])
+  fecha                  DateTime    @default(now())
+  refCia                 String? // REF / CIA de la hoja
+  estado                 OrderStatus @default(ABIERTA)
+  notas                  String?
+  instruccionesEspeciales String?
+  // balanceDue NUNCA se guarda: total - sum(payments)
+  subtotal               Decimal     @db.Decimal(10, 2)
+  total                  Decimal     @db.Decimal(10, 2)
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  prescriptions Prescription[]
+  lensConfig    LensConfig?
+  frame         Frame?
+  contactLenses ContactLens[]
+  charges       ChargeLine[]
+  payments      Payment[]
+
+  @@index([customerId])
+  @@index([estado])
+  @@index([fecha])
+}
+
+model Prescription {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ojo       Eye
+  sphere    String?
+  cylinder  String?
+  axis      String?
+  prism     String?
+  base      String?
+  far       String?
+  near      String?
+  add       String?
+  segHeight String?
+
+  @@unique([orderId, ojo])
+}
+
+model LensConfig {
+  id               String          @id @default(cuid())
+  orderId          String          @unique
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tipo             LensType
+  subtipo          String? // flat top, kryptok, executive, 7/25, 7/28, 8/35, 25, 28, 35, 40...
+  material         LensMaterial?
+  estiloProgresivo String? // "Style" de la sección PROGRESSIVE
+  lensColor        String?
+  colorStyle       LensColorStyle?
+  tratamientos     LensTreatment[]
+}
+
+model Frame {
+  id         String     @id @default(cuid())
+  orderId    String     @unique
+  order      Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  eyeSize    String?
+  bridge     String?
+  temple     String?
+  vertical   String?
+  ed         String? // E.D. de la hoja
+  company    String?
+  color      String? // COL
+  style      String?
+  tipo       FrameType?
+  ownFrame   Boolean    @default(false)
+  toCome     Boolean    @default(false)
+  lensesOnly Boolean    @default(false)
+}
+
+model ContactLens {
+  id      String  @id @default(cuid())
+  orderId String
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ojo     Eye
+  bc      String? // base curve
+  dia     String? // diámetro
+  power   String?
+  color   String?
+  marca   String?
+
+  @@unique([orderId, ojo])
+}
+
+model ChargeLine {
+  id          String        @id @default(cuid())
+  orderId     String
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  concepto    ChargeConcept
+  descripcion String?
+  monto       Decimal       @db.Decimal(10, 2)
+}
+
+model Payment {
+  id      String        @id @default(cuid())
+  orderId String
+  order   Order         @relation(fields: [orderId], references: [id]) // sin cascade: los pagos no se borran al borrar orden
+  fecha   DateTime      @default(now())
+  monto   Decimal       @db.Decimal(10, 2)
+  metodo  PaymentMethod
+  userId  String // quién cobró
+  user    User          @relation(fields: [userId], references: [id])
+  nota    String?
+
+  @@index([orderId])
+  @@index([fecha])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  accion    String
+  entidad   String
+  entidadId String
+  timestamp DateTime @default(now())
+
+  @@index([entidad, entidadId])
+}
