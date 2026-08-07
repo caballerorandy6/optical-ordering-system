@@ -8,19 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+
+const DEMO_ACCOUNTS = [
+  { label: "Administrador", email: "admin@optica.local", password: "Admin123!" },
+  { label: "Staff (María)", email: "maria@optica.local", password: "Staff123!" },
+] as const;
 
 export function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
+  async function doSignIn(emailValue: string, passwordValue: string) {
     setIsLoading(true);
-    const { error } = await signIn.email({
-      email: String(form.get("email")),
-      password: String(form.get("password")),
-    });
+    const { error } = await signIn.email({ email: emailValue, password: passwordValue });
     setIsLoading(false);
     if (error) {
       toast.error("Credenciales incorrectas. Verifica tu email y contraseña.");
@@ -33,7 +36,13 @@ export function LoginForm() {
   return (
     <Card>
       <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void doSignIn(email, password);
+          }}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -43,6 +52,8 @@ export function LoginForm() {
               autoComplete="email"
               required
               placeholder="tu@optica.local"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -53,12 +64,40 @@ export function LoginForm() {
               type="password"
               autoComplete="current-password"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-2">
+          <p className="text-center text-xs font-medium text-muted-foreground">
+            Cuentas de demostración — toca para entrar
+          </p>
+          {DEMO_ACCOUNTS.map((acc) => (
+            <button
+              key={acc.email}
+              type="button"
+              disabled={isLoading}
+              onClick={() => {
+                setEmail(acc.email);
+                setPassword(acc.password);
+                void doSignIn(acc.email, acc.password);
+              }}
+              className="w-full rounded-md border p-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
+            >
+              <span className="font-medium">{acc.label}</span>
+              <span className="block text-xs text-muted-foreground">
+                {acc.email} · {acc.password}
+              </span>
+            </button>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
