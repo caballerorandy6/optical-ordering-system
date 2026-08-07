@@ -2,12 +2,14 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export function CustomerSearch({ placeholder }: { placeholder: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("common");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleChange(value: string) {
@@ -32,7 +34,7 @@ export function CustomerSearch({ placeholder }: { placeholder: string }) {
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
         className="pl-9"
-        aria-label="Buscar"
+        aria-label={t("search")}
       />
     </div>
   );

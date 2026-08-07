@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Plus } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { listOrders, type OrderListFilter } from "@/lib/queries";
 import { formatUSD } from "@/lib/money";
-import { ORDER_STATUS } from "@/lib/catalogs";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { CustomerSearch } from "@/components/customers/customer-search";
 import { Button } from "@/components/ui/button";
@@ -20,17 +20,21 @@ import {
 
 export const metadata: Metadata = { title: "Órdenes" };
 
-const FILTERS: Array<{ key: string; label: string }> = [
-  { key: "todas", label: "Todas" },
-  { key: "balance", label: "Con balance" },
-  { key: "ABIERTA", label: "Abiertas" },
-  { key: "LISTA", label: "Listas" },
-  { key: "ENTREGADA", label: "Entregadas" },
-  { key: "CANCELADA", label: "Canceladas" },
-];
+const FILTERS = [
+  { key: "todas", labelKey: "filterAll" },
+  { key: "balance", labelKey: "filterWithBalance" },
+  { key: "ABIERTA", labelKey: "filterOpen" },
+  { key: "LISTA", labelKey: "filterReady" },
+  { key: "ENTREGADA", labelKey: "filterDelivered" },
+  { key: "CANCELADA", labelKey: "filterCancelled" },
+] as const;
 
 export default async function OrdenesPage({ searchParams }: PageProps<"/ordenes">) {
   await requireUser();
+  const t = await getTranslations("orders");
+  const tc = await getTranslations("catalogs");
+  const tcommon = await getTranslations("common");
+  const locale = await getLocale();
   const sp = await searchParams;
   const filtro = typeof sp.filtro === "string" ? sp.filtro : "todas";
   const q = typeof sp.q === "string" ? sp.q : "";
@@ -42,14 +46,17 @@ export default async function OrdenesPage({ searchParams }: PageProps<"/ordenes"
 
   const orders = await listOrders(filter);
   const totalBalanceCents = orders.reduce((acc, o) => acc + o.balanceCents, 0);
+  const dateFmt = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-US", {
+    dateStyle: "medium",
+  });
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Órdenes</h1>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <Button asChild>
           <Link href="/ordenes/nueva">
-            <Plus className="size-4" aria-hidden /> Nueva orden
+            <Plus className="size-4" aria-hidden /> {t("new")}
           </Link>
         </Button>
       </div>
@@ -63,17 +70,17 @@ export default async function OrdenesPage({ searchParams }: PageProps<"/ordenes"
             asChild
           >
             <Link href={`/ordenes?filtro=${f.key}${q ? `&q=${encodeURIComponent(q)}` : ""}`}>
-              {f.label}
+              {t(f.labelKey)}
             </Link>
           </Button>
         ))}
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <CustomerSearch placeholder="Buscar por cliente o folio..." />
+        <CustomerSearch placeholder={t("searchPlaceholder")} />
         {filtro === "balance" && (
           <Badge variant="secondary" className="text-sm">
-            Total pendiente: {formatUSD(totalBalanceCents)}
+            {t("totalPending", { amount: formatUSD(totalBalanceCents) })}
           </Badge>
         )}
       </div>
@@ -82,20 +89,20 @@ export default async function OrdenesPage({ searchParams }: PageProps<"/ordenes"
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Folio</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead className="hidden md:table-cell">Vendido por</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
+              <TableHead>{t("folio")}</TableHead>
+              <TableHead>{tcommon("date")}</TableHead>
+              <TableHead>{t("customer")}</TableHead>
+              <TableHead className="hidden md:table-cell">{t("soldBy")}</TableHead>
+              <TableHead>{tcommon("status")}</TableHead>
+              <TableHead className="text-right">{tcommon("total")}</TableHead>
+              <TableHead className="text-right">{tcommon("balance")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orders.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground">
-                  No hay órdenes con este filtro
+                  {t("empty")}
                 </TableCell>
               </TableRow>
             )}
@@ -109,13 +116,11 @@ export default async function OrdenesPage({ searchParams }: PageProps<"/ordenes"
                     #{o.folio}
                   </Link>
                 </TableCell>
-                <TableCell>
-                  {new Intl.DateTimeFormat("es-US", { dateStyle: "medium" }).format(o.fecha)}
-                </TableCell>
+                <TableCell>{dateFmt.format(o.fecha)}</TableCell>
                 <TableCell>{o.cliente}</TableCell>
                 <TableCell className="hidden md:table-cell">{o.vendedor}</TableCell>
                 <TableCell>
-                  <OrderStatusBadge estado={o.estado} label={ORDER_STATUS[o.estado]} />
+                  <OrderStatusBadge estado={o.estado} label={tc(`orderStatus.${o.estado}`)} />
                 </TableCell>
                 <TableCell className="text-right">{formatUSD(o.totalCents)}</TableCell>
                 <TableCell

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { NewUserForm } from "@/components/config/new-user-form";
@@ -20,6 +21,9 @@ export const metadata: Metadata = { title: "Configuración" };
 export default async function ConfigPage() {
   const user = await requireUser();
   if (user.role !== "ADMIN") redirect("/ordenes");
+  const t = await getTranslations("config");
+  const tnav = await getTranslations("nav");
+  const tcommon = await getTranslations("common");
 
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "asc" },
@@ -28,11 +32,11 @@ export default async function ConfigPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Configuración</h1>
+      <h1 className="text-2xl font-semibold">{t("title")}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Nuevo usuario</CardTitle>
+          <CardTitle>{t("newUser")}</CardTitle>
         </CardHeader>
         <CardContent>
           <NewUserForm />
@@ -41,17 +45,17 @@ export default async function ConfigPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios</CardTitle>
+          <CardTitle>{t("users")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead>{t("name")}</TableHead>
+                <TableHead>{t("email")}</TableHead>
+                <TableHead>{t("role")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead className="text-right">{tcommon("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,14 +65,14 @@ export default async function ConfigPage() {
                   <TableCell>{u.email}</TableCell>
                   <TableCell>
                     <Badge variant={u.role === "ADMIN" ? "default" : "secondary"}>
-                      {u.role === "ADMIN" ? "Admin" : "Staff"}
+                      {u.role === "ADMIN" ? tnav("roleAdmin") : tnav("roleStaff")}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     {u.banned ? (
-                      <Badge variant="destructive">Desactivado</Badge>
+                      <Badge variant="destructive">{t("deactivated")}</Badge>
                     ) : (
-                      <Badge variant="outline">Activo</Badge>
+                      <Badge variant="outline">{t("active")}</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">

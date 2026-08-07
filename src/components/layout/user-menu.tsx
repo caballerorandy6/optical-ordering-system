@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LogOut, UserCircle } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 
 export function UserMenu({ name, role }: { name: string; role: string }) {
   const router = useRouter();
+  const t = useTranslations("nav");
 
   async function handleSignOut() {
     await signOut();
@@ -34,13 +36,13 @@ export function UserMenu({ name, role }: { name: string; role: string }) {
         <DropdownMenuLabel>
           {name}
           <span className="block text-xs font-normal text-muted-foreground">
-            {role === "ADMIN" ? "Administrador" : "Staff"}
+            {role === "ADMIN" ? t("roleAdmin") : t("roleStaff")}
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="size-4" aria-hidden />
-          Cerrar sesión
+          {t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { deletePayment } from "@/actions/payments";
@@ -18,6 +19,8 @@ import {
 
 export function DeletePaymentButton({ paymentId }: { paymentId: string }) {
   const router = useRouter();
+  const t = useTranslations("orderDetail");
+  const tcommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -29,7 +32,7 @@ export function DeletePaymentButton({ paymentId }: { paymentId: string }) {
       toast.error(result.error);
       return;
     }
-    toast.success("Pago corregido (eliminado)");
+    toast.success(t("paymentDeleted"));
     setOpen(false);
     router.refresh();
   }
@@ -37,24 +40,21 @@ export function DeletePaymentButton({ paymentId }: { paymentId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Corregir (eliminar) pago">
+        <Button variant="ghost" size="icon" aria-label={t("correctPayment")}>
           <Trash2 className="size-4 text-destructive" aria-hidden />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>¿Eliminar este pago?</DialogTitle>
-          <DialogDescription>
-            Esta corrección quedará registrada en la bitácora de auditoría. El balance de la
-            orden se recalculará automáticamente.
-          </DialogDescription>
+          <DialogTitle>{t("deletePaymentTitle")}</DialogTitle>
+          <DialogDescription>{t("deletePaymentDescription")}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancelar
+            {tcommon("cancel")}
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? "Eliminando..." : "Eliminar pago"}
+            {isDeleting ? t("deleting") : t("deletePaymentConfirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

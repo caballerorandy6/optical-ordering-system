@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ClipboardList, Users, BarChart3, Settings, Glasses } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/ordenes", label: "Órdenes", icon: ClipboardList },
-  { href: "/clientes", label: "Clientes", icon: Users },
-  { href: "/reportes", label: "Reportes", icon: BarChart3 },
-  { href: "/config", label: "Config", icon: Settings },
+  { href: "/ordenes", key: "orders", icon: ClipboardList },
+  { href: "/clientes", key: "customers", icon: Users },
+  { href: "/reportes", key: "reports", icon: BarChart3 },
+  { href: "/config", key: "config", icon: Settings },
 ] as const;
 
 export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
   const items = NAV.filter((item) => item.href !== "/config" || isAdmin);
 
   return (
@@ -24,8 +26,8 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
           <Glasses className="size-5 text-primary" aria-hidden />
           <span className="font-semibold">Óptica</span>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 p-2" aria-label="Navegación principal">
-          {items.map(({ href, label, icon: Icon }) => (
+        <nav className="flex flex-1 flex-col gap-1 p-2" aria-label={t("mainNavigation")}>
+          {items.map(({ href, key, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -37,7 +39,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
               )}
             >
               <Icon className="size-4" aria-hidden />
-              {label}
+              {t(key)}
             </Link>
           ))}
         </nav>
@@ -46,9 +48,9 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
       {/* Barra inferior en móvil/tablet vertical */}
       <nav
         className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-background md:hidden"
-        aria-label="Navegación principal"
+        aria-label={t("mainNavigation")}
       >
-        {items.map(({ href, label, icon: Icon }) => (
+        {items.map(({ href, key, icon: Icon }) => (
           <Link
             key={href}
             href={href}
@@ -58,7 +60,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
             )}
           >
             <Icon className="size-5" aria-hidden />
-            {label}
+            {t(key)}
           </Link>
         ))}
       </nav>

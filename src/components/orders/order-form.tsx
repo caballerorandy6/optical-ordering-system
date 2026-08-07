@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { orderSchema, type OrderInput } from "@/lib/validations";
@@ -34,6 +35,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
+// Los encabezados de la tabla Rx replican la hoja física (términos ópticos en inglés)
 const RX_COLUMNS = [
   { key: "sphere", label: "Sphere" },
   { key: "cylinder", label: "Cylinder" },
@@ -64,6 +66,9 @@ export function OrderForm({
   preselectedCustomerId?: string;
 }) {
   const router = useRouter();
+  const t = useTranslations("orderForm");
+  const tc = useTranslations("catalogs");
+  const tcommon = useTranslations("common");
   const [isSaving, setIsSaving] = useState(false);
   const [customerQuery, setCustomerQuery] = useState("");
 
@@ -71,7 +76,6 @@ export function OrderForm({
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<OrderInput>({
@@ -120,13 +124,14 @@ export function OrderForm({
 
   const { fields: chargeFields, append, remove } = useFieldArray({ control, name: "charges" });
 
-  const charges = watch("charges");
-  const deposito = watch("deposito");
-  const lensTipo = watch("lensConfig.tipo") ?? "SV";
-  const selectedCustomerId = watch("customerId");
+  // useWatch (no watch): compatible con React Compiler y re-renderiza al cambiar los campos
+  const charges = useWatch({ control, name: "charges" });
+  const deposito = useWatch({ control, name: "deposito" });
+  const lensTipo = useWatch({ control, name: "lensConfig.tipo" }) ?? "SV";
+  const selectedCustomerId = useWatch({ control, name: "customerId" });
 
   // Subtotal/total/balance calculados en vivo (misma lógica que el servidor).
-  // Sin useMemo: watch() muta el mismo array, así que la referencia no cambia entre renders.
+  // Sin useMemo: la referencia del array puede no cambiar entre renders.
   let subtotalCents = 0;
   for (const c of charges ?? []) {
     const n = Number(c.monto);
@@ -150,7 +155,7 @@ export function OrderForm({
       toast.error(result.error);
       return;
     }
-    toast.success("Orden creada");
+    toast.success(t("success"));
     router.push(`/ordenes/${result.id}`);
     router.refresh();
   }
@@ -162,24 +167,24 @@ export function OrderForm({
       {/* ─── Cliente / header de la hoja ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Cliente</CardTitle>
+          <CardTitle>{t("customerSection")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2 md:col-span-2">
-            <Label>Cliente *</Label>
+            <Label>{t("customerLabel")}</Label>
             <Input
-              placeholder="Filtrar por nombre..."
+              placeholder={t("customerFilter")}
               value={customerQuery}
               onChange={(e) => setCustomerQuery(e.target.value)}
-              aria-label="Filtrar clientes"
+              aria-label={t("customerFilterAria")}
             />
             <Controller
               control={control}
               name="customerId"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger aria-label="Seleccionar cliente">
-                    <SelectValue placeholder="Selecciona un cliente" />
+                  <SelectTrigger aria-label={t("customerSelectAria")}>
+                    <SelectValue placeholder={t("customerSelect")} />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredCustomers.map((c) => (
@@ -188,7 +193,7 @@ export function OrderForm({
                       </SelectItem>
                     ))}
                     {filteredCustomers.length === 0 && (
-                      <p className="p-2 text-sm text-muted-foreground">Sin resultados</p>
+                      <p className="p-2 text-sm text-muted-foreground">{t("noResults")}</p>
                     )}
                   </SelectContent>
                 </Select>
@@ -198,13 +203,11 @@ export function OrderForm({
               <p className="text-sm text-destructive">{errors.customerId.message}</p>
             )}
             {!selectedCustomerId && (
-              <p className="text-xs text-muted-foreground">
-                ¿Cliente nuevo? Créalo primero en Clientes → Nuevo cliente.
-              </p>
+              <p className="text-xs text-muted-foreground">{t("newCustomerHint")}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="refCia">REF / CIA</Label>
+            <Label htmlFor="refCia">{t("refCia")}</Label>
             <Input id="refCia" {...register("refCia")} />
           </div>
         </CardContent>
@@ -213,10 +216,10 @@ export function OrderForm({
       {/* ─── Rx: tabla OD/OS como en la hoja ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Prescripción (Rx)</CardTitle>
+          <CardTitle>{t("rxSection")}</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <table className="w-full min-w-[760px] border-collapse text-sm">
+          <table className="w-full min-w-190 border-collapse text-sm">
             <thead>
               <tr>
                 <th className="w-12 border bg-muted p-1 text-left"> </th>
@@ -262,12 +265,12 @@ export function OrderForm({
       {/* ─── Lentes ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Lentes</CardTitle>
+          <CardTitle>{t("lensesSection")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Tipo</Label>
+              <Label>{t("lensType")}</Label>
               <Controller
                 control={control}
                 name="lensConfig.tipo"
@@ -279,13 +282,13 @@ export function OrderForm({
                       setValue("lensConfig.subtipo", "");
                     }}
                   >
-                    <SelectTrigger aria-label="Tipo de lente">
+                    <SelectTrigger aria-label={t("lensTypeAria")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(LENS_TYPES).map(([k, v]) => (
+                      {Object.keys(LENS_TYPES).map((k) => (
                         <SelectItem key={k} value={k}>
-                          {v}
+                          {tc(`lensTypes.${k}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -295,14 +298,14 @@ export function OrderForm({
             </div>
             {LENS_SUBTYPES[lensTipo]?.length > 0 && (
               <div className="space-y-2">
-                <Label>Subtipo</Label>
+                <Label>{t("subtype")}</Label>
                 <Controller
                   control={control}
                   name="lensConfig.subtipo"
                   render={({ field }) => (
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger aria-label="Subtipo de lente">
-                        <SelectValue placeholder="Selecciona..." />
+                      <SelectTrigger aria-label={t("subtypeAria")}>
+                        <SelectValue placeholder={t("subtypeSelect")} />
                       </SelectTrigger>
                       <SelectContent>
                         {LENS_SUBTYPES[lensTipo].map((s) => (
@@ -318,24 +321,24 @@ export function OrderForm({
             )}
             {lensTipo === "PROGRESSIVE" && (
               <div className="space-y-2">
-                <Label htmlFor="estiloProgresivo">Estilo (Style)</Label>
+                <Label htmlFor="estiloProgresivo">{t("progressiveStyle")}</Label>
                 <Input id="estiloProgresivo" {...register("lensConfig.estiloProgresivo")} />
               </div>
             )}
             <div className="space-y-2">
-              <Label>Material</Label>
+              <Label>{t("material")}</Label>
               <Controller
                 control={control}
                 name="lensConfig.material"
                 render={({ field }) => (
                   <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                    <SelectTrigger aria-label="Material del lente">
-                      <SelectValue placeholder="Selecciona..." />
+                    <SelectTrigger aria-label={t("materialAria")}>
+                      <SelectValue placeholder={t("materialSelect")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(LENS_MATERIALS).map(([k, v]) => (
+                      {Object.keys(LENS_MATERIALS).map((k) => (
                         <SelectItem key={k} value={k}>
-                          {v}
+                          {tc(`materials.${k}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -344,7 +347,7 @@ export function OrderForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lensColor">Lens color</Label>
+              <Label htmlFor="lensColor">{t("lensColor")}</Label>
               <div className="flex gap-2">
                 <Input id="lensColor" {...register("lensConfig.lensColor")} />
                 <Controller
@@ -352,13 +355,13 @@ export function OrderForm({
                   name="lensConfig.colorStyle"
                   render={({ field }) => (
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-40" aria-label="Estilo de color">
-                        <SelectValue placeholder="Estilo" />
+                      <SelectTrigger className="w-40" aria-label={t("colorStyleAria")}>
+                        <SelectValue placeholder={t("colorStylePlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(LENS_COLOR_STYLES).map(([k, v]) => (
+                        {Object.keys(LENS_COLOR_STYLES).map((k) => (
                           <SelectItem key={k} value={k}>
-                            {v}
+                            {tc(`colorStyles.${k}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -370,18 +373,18 @@ export function OrderForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Tratamientos</Label>
+            <Label>{t("treatments")}</Label>
             <Controller
               control={control}
               name="lensConfig.tratamientos"
               render={({ field }) => (
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                  {Object.entries(LENS_TREATMENTS).map(([k, v]) => {
+                  {Object.keys(LENS_TREATMENTS).map((k) => {
                     const checked = field.value?.includes(k as never) ?? false;
                     return (
                       <label
                         key={k}
-                        className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm has-[[data-state=checked]]:border-primary"
+                        className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm has-data-[state=checked]:border-primary"
                       >
                         <Checkbox
                           checked={checked}
@@ -392,7 +395,7 @@ export function OrderForm({
                             field.onChange([...set]);
                           }}
                         />
-                        {v}
+                        {tc(`treatments.${k}`)}
                       </label>
                     );
                   })}
@@ -406,17 +409,17 @@ export function OrderForm({
       {/* ─── Montura ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Montura (Frame)</CardTitle>
+          <CardTitle>{t("frameSection")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             {(
               [
-                ["eyeSize", "Eye size"],
-                ["bridge", "Bridge"],
-                ["temple", "Temple"],
-                ["vertical", "Vertical"],
-                ["ed", "E.D."],
+                ["eyeSize", t("frameEyeSize")],
+                ["bridge", t("frameBridge")],
+                ["temple", t("frameTemple")],
+                ["vertical", t("frameVertical")],
+                ["ed", t("frameEd")],
               ] as const
             ).map(([key, label]) => (
               <div key={key} className="space-y-1">
@@ -427,33 +430,33 @@ export function OrderForm({
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-1">
-              <Label htmlFor="frame-company">Marca (Company)</Label>
+              <Label htmlFor="frame-company">{t("frameCompany")}</Label>
               <Input id="frame-company" {...register("frame.company")} />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="frame-color">Color (COL)</Label>
+              <Label htmlFor="frame-color">{t("frameColor")}</Label>
               <Input id="frame-color" {...register("frame.color")} />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="frame-style">Estilo (Style)</Label>
+              <Label htmlFor="frame-style">{t("frameStyle")}</Label>
               <Input id="frame-style" {...register("frame.style")} />
             </div>
           </div>
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1">
-              <Label>Tipo</Label>
+              <Label>{t("frameType")}</Label>
               <Controller
                 control={control}
                 name="frame.tipo"
                 render={({ field }) => (
                   <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-44" aria-label="Tipo de montura">
-                      <SelectValue placeholder="Selecciona..." />
+                    <SelectTrigger className="w-44" aria-label={t("frameTypeAria")}>
+                      <SelectValue placeholder={t("frameTypeSelect")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(FRAME_TYPES).map(([k, v]) => (
+                      {Object.keys(FRAME_TYPES).map((k) => (
                         <SelectItem key={k} value={k}>
-                          {v}
+                          {tc(`frameTypes.${k}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -463,9 +466,9 @@ export function OrderForm({
             </div>
             {(
               [
-                ["ownFrame", "Montura propia (Own frame)"],
-                ["toCome", "Por llegar (To come)"],
-                ["lensesOnly", "Solo micas (Lenses only)"],
+                ["ownFrame", t("ownFrame")],
+                ["toCome", t("toCome")],
+                ["lensesOnly", t("lensesOnly")],
               ] as const
             ).map(([key, label]) => (
               <Controller
@@ -487,10 +490,10 @@ export function OrderForm({
       {/* ─── Lentes de contacto ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Lentes de contacto</CardTitle>
+          <CardTitle>{t("contactsSection")}</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
+          <table className="w-full min-w-140 border-collapse text-sm">
             <thead>
               <tr>
                 <th className="w-12 border bg-muted p-1"> </th>
@@ -526,7 +529,7 @@ export function OrderForm({
       {/* ─── Cargos + totales en vivo ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Cargos</CardTitle>
+          <CardTitle>{t("chargesSection")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {chargeFields.map((field, idx) => (
@@ -536,13 +539,13 @@ export function OrderForm({
                 name={`charges.${idx}.concepto`}
                 render={({ field: f }) => (
                   <Select value={f.value} onValueChange={f.onChange}>
-                    <SelectTrigger className="w-44" aria-label="Concepto">
+                    <SelectTrigger className="w-44" aria-label={t("conceptAria")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(CHARGE_CONCEPTS).map(([k, v]) => (
+                      {Object.keys(CHARGE_CONCEPTS).map((k) => (
                         <SelectItem key={k} value={k}>
-                          {v}
+                          {tc(`chargeConcepts.${k}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -550,7 +553,7 @@ export function OrderForm({
                 )}
               />
               <Input
-                placeholder="Descripción (opcional)"
+                placeholder={t("chargeDescription")}
                 className="min-w-40 flex-1"
                 {...register(`charges.${idx}.descripcion` as const)}
               />
@@ -562,7 +565,7 @@ export function OrderForm({
                   inputMode="decimal"
                   placeholder="0.00"
                   className="w-28 pl-6 text-right"
-                  aria-label="Monto"
+                  aria-label={t("chargeAmountAria")}
                   {...register(`charges.${idx}.monto` as const)}
                 />
               </div>
@@ -572,7 +575,7 @@ export function OrderForm({
                 size="icon"
                 onClick={() => remove(idx)}
                 disabled={chargeFields.length === 1}
-                aria-label="Quitar línea"
+                aria-label={t("removeLine")}
               >
                 <Trash2 className="size-4" aria-hidden />
               </Button>
@@ -589,7 +592,7 @@ export function OrderForm({
             size="sm"
             onClick={() => append({ concepto: "OTRO", descripcion: "", monto: "" })}
           >
-            <Plus className="size-4" aria-hidden /> Agregar línea
+            <Plus className="size-4" aria-hidden /> {t("addLine")}
           </Button>
           {errors.charges?.root && (
             <p className="text-sm text-destructive">{errors.charges.root.message}</p>
@@ -602,15 +605,15 @@ export function OrderForm({
 
           <div className="ml-auto w-full max-w-xs space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-muted-foreground">{tcommon("subtotal")}</span>
               <span className="font-medium">{formatUSD(subtotalCents)}</span>
             </div>
             <div className="flex justify-between text-base">
-              <span className="font-medium">Total</span>
+              <span className="font-medium">{tcommon("total")}</span>
               <span className="font-semibold">{formatUSD(subtotalCents)}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground">Depósito</span>
+              <span className="text-muted-foreground">{t("deposit")}</span>
               <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
                   $
@@ -619,26 +622,26 @@ export function OrderForm({
                   inputMode="decimal"
                   placeholder="0.00"
                   className="w-28 pl-6 text-right"
-                  aria-label="Depósito"
+                  aria-label={t("depositAria")}
                   {...register("deposito")}
                 />
               </div>
             </div>
             {Number(deposito || 0) > 0 && (
               <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Método</span>
+                <span className="text-muted-foreground">{t("depositMethod")}</span>
                 <Controller
                   control={control}
                   name="depositoMetodo"
                   render={({ field }) => (
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-36" aria-label="Método del depósito">
-                        <SelectValue placeholder="Método..." />
+                      <SelectTrigger className="w-36" aria-label={t("depositMethodAria")}>
+                        <SelectValue placeholder={t("depositMethodPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(PAYMENT_METHODS).map(([k, v]) => (
+                        {Object.keys(PAYMENT_METHODS).map((k) => (
                           <SelectItem key={k} value={k}>
-                            {v}
+                            {tc(`paymentMethods.${k}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -655,7 +658,7 @@ export function OrderForm({
             )}
             <Separator />
             <div className="flex justify-between text-base">
-              <span className="font-semibold">Balance (Bal. Due)</span>
+              <span className="font-semibold">{t("balanceDue")}</span>
               <span
                 className={`font-bold ${balanceCents > 0 ? "text-destructive" : "text-emerald-600"}`}
               >
@@ -670,11 +673,11 @@ export function OrderForm({
       <Card>
         <CardContent className="grid gap-4 pt-6 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="notas">Notas</Label>
+            <Label htmlFor="notas">{t("notes")}</Label>
             <Textarea id="notas" rows={3} {...register("notas")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="instrucciones">Instrucciones especiales</Label>
+            <Label htmlFor="instrucciones">{t("specialInstructions")}</Label>
             <Textarea id="instrucciones" rows={3} {...register("instruccionesEspeciales")} />
           </div>
         </CardContent>
@@ -682,10 +685,10 @@ export function OrderForm({
 
       <div className="sticky bottom-16 z-30 flex justify-end gap-2 rounded-md border bg-background/95 p-3 backdrop-blur md:bottom-4">
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancelar
+          {tcommon("cancel")}
         </Button>
         <Button type="submit" disabled={isSaving}>
-          {isSaving ? "Guardando orden..." : "Guardar orden"}
+          {isSaving ? t("submitting") : t("submit")}
         </Button>
       </div>
     </form>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { newUserSchema, type NewUserInput } from "@/lib/validations";
 import { createStaffUser } from "@/actions/users";
@@ -20,6 +21,8 @@ import {
 
 export function NewUserForm() {
   const router = useRouter();
+  const t = useTranslations("config");
+  const tnav = useTranslations("nav");
   const [isSaving, setIsSaving] = useState(false);
   const {
     register,
@@ -41,7 +44,7 @@ export function NewUserForm() {
       toast.error(result.error);
       return;
     }
-    toast.success("Usuario creado");
+    toast.success(t("created"));
     reset();
     router.refresh();
   }
@@ -49,39 +52,39 @@ export function NewUserForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap items-end gap-3">
       <div className="space-y-1">
-        <Label htmlFor="u-name">Nombre</Label>
+        <Label htmlFor="u-name">{t("name")}</Label>
         <Input id="u-name" {...register("name")} />
         {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
       </div>
       <div className="space-y-1">
-        <Label htmlFor="u-email">Email</Label>
+        <Label htmlFor="u-email">{t("email")}</Label>
         <Input id="u-email" type="email" {...register("email")} />
         {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
       </div>
       <div className="space-y-1">
-        <Label htmlFor="u-pass">Contraseña</Label>
+        <Label htmlFor="u-pass">{t("password")}</Label>
         <Input id="u-pass" type="password" autoComplete="new-password" {...register("password")} />
         {errors.password && (
           <p className="text-sm text-destructive">{errors.password.message}</p>
         )}
       </div>
       <div className="space-y-1">
-        <Label>Rol</Label>
+        <Label>{t("role")}</Label>
         <Select
           value={watch("role")}
           onValueChange={(v) => setValue("role", v as NewUserInput["role"])}
         >
-          <SelectTrigger className="w-32" aria-label="Rol">
+          <SelectTrigger className="w-36" aria-label={t("roleAria")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="STAFF">Staff</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
+            <SelectItem value="STAFF">{tnav("roleStaff")}</SelectItem>
+            <SelectItem value="ADMIN">{tnav("roleAdmin")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <Button type="submit" disabled={isSaving}>
-        {isSaving ? "Creando..." : "Crear usuario"}
+        {isSaving ? t("creating") : t("create")}
       </Button>
     </form>
   );

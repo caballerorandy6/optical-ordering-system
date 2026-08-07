@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { setUserActive } from "@/actions/users";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export function UserActiveToggle({
   isSelf: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations("config");
   const [isSaving, setIsSaving] = useState(false);
 
   async function toggle() {
@@ -26,7 +28,7 @@ export function UserActiveToggle({
       toast.error(result.error);
       return;
     }
-    toast.success(isBanned ? "Usuario reactivado" : "Usuario desactivado");
+    toast.success(isBanned ? t("reactivated_toast") : t("deactivated_toast"));
     router.refresh();
   }
 
@@ -39,7 +41,7 @@ export function UserActiveToggle({
       onClick={toggle}
       disabled={isSaving}
     >
-      {isSaving ? "..." : isBanned ? "Reactivar" : "Desactivar"}
+      {isSaving ? "..." : isBanned ? t("reactivate") : t("deactivate")}
     </Button>
   );
 }

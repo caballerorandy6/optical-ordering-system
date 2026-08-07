@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { OrderForm } from "@/components/orders/order-form";
@@ -9,6 +10,7 @@ export default async function NuevaOrdenPage({
   searchParams,
 }: PageProps<"/ordenes/nueva">) {
   await requireUser();
+  const t = await getTranslations("orderForm");
   const sp = await searchParams;
   const preselected = typeof sp.cliente === "string" ? sp.cliente : undefined;
 
@@ -19,7 +21,7 @@ export default async function NuevaOrdenPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <h1 className="text-2xl font-semibold">Nueva orden</h1>
+      <h1 className="text-2xl font-semibold">{t("title")}</h1>
       <OrderForm
         preselectedCustomerId={preselected}
         customers={customers.map((c) => ({

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const DEMO_ACCOUNTS = [
-  { label: "Administrador", email: "admin@optica.local", password: "Admin123!" },
-  { label: "Staff (María)", email: "maria@optica.local", password: "Staff123!" },
+  { labelKey: "demoAdmin", email: "admin@optica.local", password: "Admin123!" },
+  { labelKey: "demoStaff", email: "maria@optica.local", password: "Staff123!" },
 ] as const;
 
 export function LoginForm() {
   const router = useRouter();
+  const t = useTranslations("login");
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +28,7 @@ export function LoginForm() {
     const { error } = await signIn.email({ email: emailValue, password: passwordValue });
     setIsLoading(false);
     if (error) {
-      toast.error("Credenciales incorrectas. Verifica tu email y contraseña.");
+      toast.error(t("invalidCredentials"));
       return;
     }
     router.push("/ordenes");
@@ -44,7 +46,7 @@ export function LoginForm() {
           className="space-y-4"
         >
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               name="email"
@@ -57,7 +59,7 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               name="password"
@@ -69,7 +71,7 @@ export function LoginForm() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Entrando..." : "Entrar"}
+            {isLoading ? t("signingIn") : t("signIn")}
           </Button>
         </form>
 
@@ -77,7 +79,7 @@ export function LoginForm() {
 
         <div className="space-y-2">
           <p className="text-center text-xs font-medium text-muted-foreground">
-            Cuentas de demostración — toca para entrar
+            {t("demoTitle")}
           </p>
           {DEMO_ACCOUNTS.map((acc) => (
             <button
@@ -91,7 +93,7 @@ export function LoginForm() {
               }}
               className="w-full rounded-md border p-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
             >
-              <span className="font-medium">{acc.label}</span>
+              <span className="font-medium">{t(acc.labelKey)}</span>
               <span className="block text-xs text-muted-foreground">
                 {acc.email} · {acc.password}
               </span>

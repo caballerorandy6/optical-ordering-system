@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Plus } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { searchCustomers } from "@/lib/queries";
@@ -16,10 +17,9 @@ import {
 
 export const metadata: Metadata = { title: "Clientes" };
 
-export default async function ClientesPage({
-  searchParams,
-}: PageProps<"/clientes">) {
+export default async function ClientesPage({ searchParams }: PageProps<"/clientes">) {
   await requireUser();
+  const t = await getTranslations("customers");
   const { q } = await searchParams;
   const query = typeof q === "string" ? q : "";
   const customers = await searchCustomers(query);
@@ -27,31 +27,31 @@ export default async function ClientesPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">Clientes</h1>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <Button asChild>
           <Link href="/clientes/nuevo">
-            <Plus className="size-4" aria-hidden /> Nuevo cliente
+            <Plus className="size-4" aria-hidden /> {t("new")}
           </Link>
         </Button>
       </div>
 
-      <CustomerSearch placeholder="Buscar por nombre o teléfono..." />
+      <CustomerSearch placeholder={t("searchPlaceholder")} />
 
       <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead>Celular</TableHead>
-              <TableHead className="hidden md:table-cell">Dirección</TableHead>
+              <TableHead>{t("name")}</TableHead>
+              <TableHead>{t("phone")}</TableHead>
+              <TableHead>{t("cell")}</TableHead>
+              <TableHead className="hidden md:table-cell">{t("address")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {customers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  {query ? "Sin resultados para tu búsqueda" : "Aún no hay clientes"}
+                  {query ? t("emptySearch") : t("empty")}
                 </TableCell>
               </TableRow>
             )}

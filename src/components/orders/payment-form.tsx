@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { addPayment } from "@/actions/payments";
 import { PAYMENT_METHODS, type PaymentMethodKey } from "@/lib/catalogs";
@@ -18,15 +19,17 @@ import {
 
 export function PaymentForm({ orderId }: { orderId: string }) {
   const router = useRouter();
+  const t = useTranslations("paymentForm");
+  const tc = useTranslations("catalogs");
   const [isSaving, setIsSaving] = useState(false);
   const [monto, setMonto] = useState("");
   const [metodo, setMetodo] = useState<PaymentMethodKey | "">("");
   const [nota, setNota] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
     if (!metodo) {
-      toast.error("Selecciona el método de pago");
+      toast.error(t("selectMethod"));
       return;
     }
     setIsSaving(true);
@@ -36,7 +39,7 @@ export function PaymentForm({ orderId }: { orderId: string }) {
       toast.error(result.error);
       return;
     }
-    toast.success("Abono registrado");
+    toast.success(t("success"));
     setMonto("");
     setMetodo("");
     setNota("");
@@ -46,7 +49,7 @@ export function PaymentForm({ orderId }: { orderId: string }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
       <div className="space-y-1">
-        <Label htmlFor="abono-monto">Abono</Label>
+        <Label htmlFor="abono-monto">{t("amount")}</Label>
         <div className="relative">
           <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
             $
@@ -63,31 +66,31 @@ export function PaymentForm({ orderId }: { orderId: string }) {
         </div>
       </div>
       <div className="space-y-1">
-        <Label>Método</Label>
+        <Label>{t("method")}</Label>
         <Select value={metodo} onValueChange={(v) => setMetodo(v as PaymentMethodKey)}>
-          <SelectTrigger className="w-36" aria-label="Método de pago">
-            <SelectValue placeholder="Método..." />
+          <SelectTrigger className="w-36" aria-label={t("method")}>
+            <SelectValue placeholder={t("methodPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(PAYMENT_METHODS).map(([k, v]) => (
+            {Object.keys(PAYMENT_METHODS).map((k) => (
               <SelectItem key={k} value={k}>
-                {v}
+                {tc(`paymentMethods.${k}`)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <div className="min-w-40 flex-1 space-y-1">
-        <Label htmlFor="abono-nota">Nota</Label>
+        <Label htmlFor="abono-nota">{t("note")}</Label>
         <Input
           id="abono-nota"
-          placeholder="Opcional"
+          placeholder={t("notePlaceholder")}
           value={nota}
           onChange={(e) => setNota(e.target.value)}
         />
       </div>
       <Button type="submit" disabled={isSaving}>
-        {isSaving ? "Registrando..." : "Registrar abono"}
+        {isSaving ? t("submitting") : t("submit")}
       </Button>
     </form>
   );
