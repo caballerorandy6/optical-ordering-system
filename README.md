@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Optical Ordering System
 
-## Getting Started
+Order management system for optical shops: prescriptions (Rx), lenses, frames, contact lenses, partial payments and balance tracking. Digitizes the paper order form so staff can register a complete order in under 3 minutes from a tablet.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, Server Actions) + TypeScript
+- **Tailwind CSS 4** + shadcn/ui
+- **PostgreSQL** + **Prisma 7** (`@prisma/adapter-pg`)
+- **Better Auth** — credentials, DB sessions, ADMIN/STAFF roles, login rate limiting
+- **Zod 4** — shared client/server validation
+- **@react-pdf/renderer** — order PDF replicating the physical form
+- **next-intl** — bilingual UI (Spanish primary, English secondary)
+- **Vitest** — unit tests for money/balance logic
+
+## Getting started
 
 ```bash
+npm install
+cp .env.example .env   # set DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL
+npx prisma migrate dev
+npx prisma db seed     # demo users + customers
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Demo accounts: `admin@optica.local / Admin123!` (admin) · `maria@optica.local / Staff123!` (staff).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `npm run dev` | Development server |
+| `npm run build` | Production build (webpack — Turbopack has a known Prisma incompatibility) |
+| `npm run test` | Vitest unit tests |
+| `npm run typecheck` | TypeScript check |
+| `npm run lint` | ESLint |
 
-## Learn More
+## Key rules
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `balanceDue` is **never stored** — always computed as `total − SUM(payments)`.
+- Money arithmetic is integer cents only (`src/lib/money.ts`).
+- Payments are immutable for STAFF; only ADMIN can correct them (audit-logged).
+- Roles are enforced server-side on every mutation (`src/lib/session.ts`).
+- Order folio is a Postgres autoincrement (concurrency-safe).
+- Business identity (name, address) lives in env vars — no client data hardcoded.
