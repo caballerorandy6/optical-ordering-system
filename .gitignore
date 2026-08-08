@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Duplicados de sincronización de iCloud
+* 2.*
+* 2
