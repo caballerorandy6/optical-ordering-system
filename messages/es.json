@@ -42,9 +42,14 @@
     "signIn": "Entrar",
     "signingIn": "Entrando...",
     "invalidCredentials": "Credenciales incorrectas. Verifica tu email y contraseña.",
-    "demoTitle": "Cuentas de demostración — toca para entrar",
+    "demoTitle": "Cuentas de demostración",
+    "demoHint": "Toca una tarjeta para entrar directo, o escribe el usuario y contraseña arriba.",
+    "demoUser": "Usuario:",
+    "demoPassword": "Contraseña:",
     "demoAdmin": "Administrador",
-    "demoStaff": "Staff (María)"
+    "demoAdminDesc": "Acceso completo: órdenes, pagos, reportes y configuración",
+    "demoStaff": "Staff (vendedor)",
+    "demoStaffDesc": "Registra órdenes y abonos; no puede corregir pagos ni cancelar"
   },
   "orders": {
     "title": "Órdenes",

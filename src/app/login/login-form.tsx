@@ -12,8 +12,18 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const DEMO_ACCOUNTS = [
-  { labelKey: "demoAdmin", email: "admin@optica.local", password: "Admin123!" },
-  { labelKey: "demoStaff", email: "maria@optica.local", password: "Staff123!" },
+  {
+    labelKey: "demoAdmin",
+    descKey: "demoAdminDesc",
+    email: "admin@optica.local",
+    password: "Admin123!",
+  },
+  {
+    labelKey: "demoStaff",
+    descKey: "demoStaffDesc",
+    email: "maria@optica.local",
+    password: "Staff123!",
+  },
 ] as const;
 
 export function LoginForm() {
@@ -78,9 +88,8 @@ export function LoginForm() {
         <Separator className="my-4" />
 
         <div className="space-y-2">
-          <p className="text-center text-xs font-medium text-muted-foreground">
-            {t("demoTitle")}
-          </p>
+          <p className="text-center text-sm font-semibold">{t("demoTitle")}</p>
+          <p className="text-center text-xs text-muted-foreground">{t("demoHint")}</p>
           {DEMO_ACCOUNTS.map((acc) => (
             <button
               key={acc.email}
@@ -91,11 +100,19 @@ export function LoginForm() {
                 setPassword(acc.password);
                 void doSignIn(acc.email, acc.password);
               }}
-              className="w-full rounded-md border p-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
+              className="w-full rounded-md border p-3 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
             >
-              <span className="font-medium">{t(acc.labelKey)}</span>
-              <span className="block text-xs text-muted-foreground">
-                {acc.email} · {acc.password}
+              <span className="font-semibold">{t(acc.labelKey)}</span>
+              <span className="mb-1 block text-xs text-muted-foreground">
+                {t(acc.descKey)}
+              </span>
+              <span className="block text-xs">
+                <span className="font-medium">{t("demoUser")}</span>{" "}
+                <span className="font-mono">{acc.email}</span>
+              </span>
+              <span className="block text-xs">
+                <span className="font-medium">{t("demoPassword")}</span>{" "}
+                <span className="font-mono">{acc.password}</span>
               </span>
             </button>
           ))}

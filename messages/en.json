@@ -42,9 +42,14 @@
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "invalidCredentials": "Invalid credentials. Check your email and password.",
-    "demoTitle": "Demo accounts — tap to sign in",
+    "demoTitle": "Demo accounts",
+    "demoHint": "Tap a card to sign in directly, or type the username and password above.",
+    "demoUser": "Username:",
+    "demoPassword": "Password:",
     "demoAdmin": "Administrator",
-    "demoStaff": "Staff (María)"
+    "demoAdminDesc": "Full access: orders, payments, reports and settings",
+    "demoStaff": "Staff (salesperson)",
+    "demoStaffDesc": "Creates orders and records payments; cannot correct payments or cancel"
   },
   "orders": {
     "title": "Orders",
