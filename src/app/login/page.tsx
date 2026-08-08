@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Glasses } from "lucide-react";
+import { getSession } from "@/lib/session";
 import { LoginForm } from "@/app/login/login-form";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 
 export const metadata: Metadata = { title: "Iniciar sesión" };
 
 export default async function LoginPage() {
+  // Sesión verificada de verdad (no solo cookie): si es válida, a /ordenes
+  const session = await getSession();
+  if (session) redirect("/ordenes");
+
   const t = await getTranslations("login");
 
   return (
