@@ -16,7 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const metadata: Metadata = { title: "Configuración" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("settings") };
+}
 
 export default async function ConfigPage() {
   const user = await requireUser();

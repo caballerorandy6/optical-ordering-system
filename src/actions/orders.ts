@@ -11,7 +11,7 @@ export async function createOrder(input: OrderInput): Promise<ActionResult> {
   const user = await requireUser();
   const parsed = orderSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
   const data = parsed.data;
 
@@ -108,7 +108,7 @@ export async function createOrder(input: OrderInput): Promise<ActionResult> {
           monto: centsToDecimalString(depositoCents),
           metodo: data.depositoMetodo,
           userId: user.id,
-          nota: "Depósito inicial",
+          nota: "Initial deposit",
         },
       });
     }
@@ -127,11 +127,11 @@ export async function createOrder(input: OrderInput): Promise<ActionResult> {
 export async function updateOrderStatus(orderId: string, estado: string): Promise<ActionResult> {
   const user = await requireUser();
   const parsed = orderStatusSchema.safeParse(estado);
-  if (!parsed.success) return { ok: false, error: "Estado inválido" };
+  if (!parsed.success) return { ok: false, error: "Invalid status" };
 
   // Cancelar una orden es correctivo: solo ADMIN
   if (parsed.data === "CANCELADA" && user.role !== "ADMIN") {
-    return { ok: false, error: "Solo un administrador puede cancelar órdenes" };
+    return { ok: false, error: "Only an administrator can cancel orders" };
   }
 
   await prisma.$transaction([
@@ -155,7 +155,7 @@ export async function deleteOrder(orderId: string): Promise<ActionResult> {
   const admin = await requireAdmin(); // STAFF no puede borrar órdenes
   const payments = await prisma.payment.count({ where: { orderId } });
   if (payments > 0) {
-    return { ok: false, error: "No se puede borrar una orden con pagos registrados. Cancélala." };
+    return { ok: false, error: "An order with recorded payments cannot be deleted. Cancel it instead." };
   }
   await prisma.$transaction([
     prisma.order.delete({ where: { id: orderId } }),

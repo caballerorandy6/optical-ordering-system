@@ -14,7 +14,7 @@ const opticalPower = (label: string) =>
         const n = Number(v);
         return Number.isFinite(n) && n >= -20 && n <= 20 && Math.round(n * 100) % 25 === 0;
       },
-      { message: `${label}: entre -20.00 y +20.00 en pasos de 0.25` }
+      { message: `${label}: between -20.00 and +20.00 in 0.25 steps` }
     )
     .optional()
     .or(z.literal(""));
@@ -28,7 +28,7 @@ const axisValue = z
       const n = Number(v);
       return Number.isInteger(n) && n >= 0 && n <= 180;
     },
-    { message: "Axis: entero entre 0 y 180" }
+    { message: "Axis: integer between 0 and 180" }
   )
   .optional()
   .or(z.literal(""));
@@ -39,17 +39,17 @@ const shortText = z.string().trim().max(30).optional().or(z.literal(""));
 const montoString = z
   .string()
   .trim()
-  .min(1, "Requerido")
+  .min(1, "Required")
   .refine((v) => Number.isFinite(Number(v)) && Number(v) >= 0, {
-    message: "Monto inválido",
+    message: "Invalid amount",
   })
-  .refine((v) => Number(v) <= 99999.99, { message: "Monto demasiado grande" });
+  .refine((v) => Number(v) <= 99999.99, { message: "Amount too large" });
 
 // ─── Cliente ───
 
 export const customerSchema = z.object({
-  nombre: z.string().trim().min(1, "El nombre es requerido").max(60),
-  apellido: z.string().trim().min(1, "El apellido es requerido").max(60),
+  nombre: z.string().trim().min(1, "Name is required").max(60),
+  apellido: z.string().trim().min(1, "Last name is required").max(60),
   telefono: z.string().trim().max(20).optional().or(z.literal("")),
   celular: z.string().trim().max(20).optional().or(z.literal("")),
   direccion: z.string().trim().max(200).optional().or(z.literal("")),
@@ -130,7 +130,7 @@ export const paymentMethodEnum = z.enum(["CASH", "VISA", "MC", "AMEX", "DISCOVER
 
 export const orderSchema = z
   .object({
-    customerId: z.string().min(1, "Selecciona un cliente"),
+    customerId: z.string().min(1, "Select a customer"),
     refCia: z.string().trim().max(60).optional().or(z.literal("")),
     notas: z.string().trim().max(1000).optional().or(z.literal("")),
     instruccionesEspeciales: z.string().trim().max(1000).optional().or(z.literal("")),
@@ -143,7 +143,7 @@ export const orderSchema = z
       .string()
       .trim()
       .refine((v) => v === "" || (Number.isFinite(Number(v)) && Number(v) >= 0), {
-        message: "Depósito inválido",
+        message: "Invalid deposit",
       })
       .optional()
       .or(z.literal("")),
@@ -154,7 +154,7 @@ export const orderSchema = z
       const dep = Number(data.deposito || 0);
       return dep === 0 || data.depositoMetodo !== undefined;
     },
-    { message: "Indica el método de pago del depósito", path: ["depositoMetodo"] }
+    { message: "Select the deposit payment method", path: ["depositoMetodo"] }
   )
   .refine(
     (data) => {
@@ -162,7 +162,7 @@ export const orderSchema = z
       const total = data.charges.reduce((acc, c) => acc + Number(c.monto), 0);
       return dep <= total;
     },
-    { message: "El depósito no puede ser mayor que el total", path: ["deposito"] }
+    { message: "The deposit cannot be greater than the total", path: ["deposito"] }
   );
 
 export type OrderInput = z.infer<typeof orderSchema>;
@@ -171,7 +171,7 @@ export type OrderInput = z.infer<typeof orderSchema>;
 
 export const paymentSchema = z.object({
   orderId: z.string().min(1),
-  monto: montoString.refine((v) => Number(v) > 0, { message: "El abono debe ser mayor a 0" }),
+  monto: montoString.refine((v) => Number(v) > 0, { message: "The payment must be greater than 0" }),
   metodo: paymentMethodEnum,
   nota: z.string().trim().max(200).optional().or(z.literal("")),
 });
@@ -185,9 +185,9 @@ export const orderStatusSchema = z.enum(["ABIERTA", "LISTA", "ENTREGADA", "CANCE
 // ─── Usuarios (Config, solo ADMIN) ───
 
 export const newUserSchema = z.object({
-  name: z.string().trim().min(1, "El nombre es requerido").max(80),
-  email: z.string().trim().email("Email inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
+  name: z.string().trim().min(1, "Name is required").max(80),
+  email: z.string().trim().email("Invalid email"),
+  password: z.string().min(8, "At least 8 characters"),
   role: z.enum(["ADMIN", "STAFF"]),
 });
 

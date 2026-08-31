@@ -17,7 +17,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const metadata: Metadata = { title: "Reportes" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("reports") };
+}
 
 function toInputDate(d: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -35,7 +38,7 @@ export default async function ReportesPage({ searchParams }: PageProps<"/reporte
   const desdeStr = typeof sp.desde === "string" ? sp.desde : undefined;
   const hastaStr = typeof sp.hasta === "string" ? sp.hasta : undefined;
   const range = parseRange(desdeStr, hastaStr);
-  const data = await getReportData(range);
+  const data = await getReportData(range, intlLocale);
 
   const exportQs = `desde=${toInputDate(range.desde)}&hasta=${toInputDate(range.hasta)}`;
   const dateFmt = new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium" });

@@ -5,7 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { prisma } from "@/lib/prisma";
 
 export const auth = betterAuth({
-  appName: "Sistema de Órdenes para Óptica",
+  appName: "Optical Ordering System",
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,

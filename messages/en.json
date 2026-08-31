@@ -233,7 +233,13 @@
     "noOrdersInRange": "No orders in range",
     "collectedByUser": "Collected by user",
     "user": "User",
-    "totalCollected": "Total collected"
+    "totalCollected": "Total collected",
+    "csvDate": "Date",
+    "csvFolio": "Folio",
+    "csvMethod": "Method",
+    "csvCollectedBy": "Collected by",
+    "csvAmount": "Amount",
+    "csvFilePrefix": "payments"
   },
   "config": {
     "title": "Settings",
@@ -311,5 +317,20 @@
       "DISCOVER": "Discover",
       "DEBIT": "Debit"
     }
+  },
+  "meta": {
+    "appTitle": "Order System — Optical Shop",
+    "appTemplate": "%s | Order System",
+    "appDescription": "Order management system for an optical shop: customers, prescriptions, lenses, frames, payments, and balances.",
+    "signIn": "Sign in",
+    "orders": "Orders",
+    "order": "Order",
+    "newOrder": "New order",
+    "customers": "Customers",
+    "customer": "Customer",
+    "newCustomer": "New customer",
+    "editCustomer": "Edit customer",
+    "reports": "Reports",
+    "settings": "Settings"
   }
 }

@@ -23,7 +23,7 @@ export async function createCustomer(input: CustomerInput): Promise<ActionResult
   await requireUser();
   const parsed = customerSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
   const customer = await prisma.customer.create({ data: toCustomerData(parsed.data) });
   revalidatePath("/clientes");
@@ -34,7 +34,7 @@ export async function updateCustomer(id: string, input: CustomerInput): Promise<
   await requireUser();
   const parsed = customerSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
   await prisma.customer.update({ where: { id }, data: toCustomerData(parsed.data) });
   revalidatePath("/clientes");

@@ -100,7 +100,7 @@ export function OrderPdf({ detail }: { detail: Detail }) {
     new Intl.DateTimeFormat("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }).format(d);
 
   return (
-    <Document title={`Orden #${order.folio}`}>
+    <Document title={`Order #${order.folio}`}>
       <Page size="LETTER" style={s.page}>
         {/* ─── Encabezado ─── */}
         <View style={s.headerRow}>
@@ -111,7 +111,7 @@ export function OrderPdf({ detail }: { detail: Detail }) {
           </View>
           <View>
             <Text>
-              <Text style={s.label}>ORDEN: </Text>#{order.folio}
+              <Text style={s.label}>ORDER: </Text>#{order.folio}
             </Text>
             <Text>
               <Text style={s.label}>DATE: </Text>

@@ -1,10 +1,12 @@
-// Catálogos y etiquetas en español. Los valores (keys) replican la hoja física.
+// Catalogs with English labels (fallback for PDF/CSV; the UI uses localized
+// messages from messages/*.json). Keys replicate the physical order sheet and
+// are the values stored in the database — never change them.
 
 export const ORDER_STATUS = {
-  ABIERTA: "Abierta",
-  LISTA: "Lista",
-  ENTREGADA: "Entregada",
-  CANCELADA: "Cancelada",
+  ABIERTA: "Open",
+  LISTA: "Ready",
+  ENTREGADA: "Delivered",
+  CANCELADA: "Cancelled",
 } as const;
 
 export const EYES = {
@@ -13,10 +15,10 @@ export const EYES = {
 } as const;
 
 export const LENS_TYPES = {
-  SV: "S.V. (visión sencilla)",
+  SV: "S.V. (single vision)",
   BIFOCAL: "Bifocal",
   TRIFOCAL: "Trifocal",
-  PROGRESSIVE: "Progresivo",
+  PROGRESSIVE: "Progressive",
 } as const;
 
 // Subtipos tal como aparecen en la hoja
@@ -28,52 +30,52 @@ export const LENS_SUBTYPES: Record<string, string[]> = {
 };
 
 export const LENS_MATERIALS = {
-  PLASTIC: "Plástico",
-  GLASS: "Cristal",
-  POLY: "Policarbonato",
-  HI_INDEX: "Alto índice",
+  PLASTIC: "Plastic",
+  GLASS: "Glass",
+  POLY: "Polycarbonate",
+  HI_INDEX: "Hi-index",
   TRANSIT: "Transitions",
 } as const;
 
 export const LENS_TREATMENTS = {
-  AR_COAT: "AR Coat (antirreflejante)",
+  AR_COAT: "AR Coat (anti-reflective)",
   POLY_BLUE_AR: "Poly Blue AR",
-  TINT: "Tinte",
+  TINT: "Tint",
   EDGE_DRILL: "Edge / Drill",
   POLY_H_INDEX: "Poly H Index",
   TRANSITIONS: "Transitions",
 } as const;
 
 export const LENS_COLOR_STYLES = {
-  GRADIENT: "Gradiente",
-  SOLID: "Sólido",
+  GRADIENT: "Gradient",
+  SOLID: "Solid",
 } as const;
 
 export const FRAME_TYPES = {
   METAL: "Metal",
-  ZYL: "Zyl (acetato)",
-  RIMLESS: "Rimless (al aire)",
+  ZYL: "Zyl (acetate)",
+  RIMLESS: "Rimless",
 } as const;
 
 export const CHARGE_CONCEPTS = {
-  EXAM: "Examen",
-  LENSES: "Lentes",
-  FRAME: "Montura",
-  CONTACT_LENSES: "Lentes de contacto",
+  EXAM: "Exam",
+  LENSES: "Lenses",
+  FRAME: "Frame",
+  CONTACT_LENSES: "Contact lenses",
   AR: "A/R",
-  TINT: "Tinte",
+  TINT: "Tint",
   EDGE_DRILL: "Edge/Drill",
   TRANSITIONS: "Transitions",
-  OTRO: "Otro",
+  OTRO: "Other",
 } as const;
 
 export const PAYMENT_METHODS = {
-  CASH: "Efectivo",
+  CASH: "Cash",
   VISA: "Visa",
   MC: "MasterCard",
   AMEX: "Amex",
   DISCOVER: "Discover",
-  DEBIT: "Débito",
+  DEBIT: "Debit",
 } as const;
 
 export type OrderStatusKey = keyof typeof ORDER_STATUS;

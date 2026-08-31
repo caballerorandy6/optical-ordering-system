@@ -19,7 +19,7 @@ export async function requireUser() {
 export async function requireAdmin() {
   const user = await requireUser();
   if (user.role !== "ADMIN") {
-    throw new Error("Acción permitida solo para administradores");
+    throw new Error("Action allowed only for administrators");
   }
   return user;
 }

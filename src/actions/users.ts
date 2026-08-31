@@ -11,7 +11,7 @@ export async function createStaffUser(input: NewUserInput): Promise<ActionResult
   await requireAdmin();
   const parsed = newUserSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
   try {
     await auth.api.createUser({

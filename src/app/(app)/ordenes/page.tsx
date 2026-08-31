@@ -18,7 +18,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const metadata: Metadata = { title: "Órdenes" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("orders") };
+}
 
 const FILTERS = [
   { key: "todas", labelKey: "filterAll" },

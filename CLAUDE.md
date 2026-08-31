@@ -1,11 +1,12 @@
 @AGENTS.md
 
-# Sistema de Órdenes para Óptica
+# Optical Ordering System
 
 ## Contexto
-App web en español para una óptica pequeña en Houston. Digitaliza el
-formulario de órdenes en papel: Rx, lentes, monturas, lentes de contacto,
-cargos, pagos parciales y balance pendiente.
+App web bilingüe (inglés primario, español secundario vía next-intl) para
+una óptica pequeña en Houston. Digitaliza el formulario de órdenes en
+papel: Rx, lentes, monturas, lentes de contacto, cargos, pagos parciales
+y balance pendiente.
 
 ## Stack
 Next.js 16 App Router + TypeScript estricto, Tailwind 4 + shadcn/ui,
@@ -13,7 +14,7 @@ Prisma 7 + PostgreSQL (adapter @prisma/adapter-pg), Better Auth con roles
 ADMIN/STAFF (plugin admin), Zod 4 compartido, @react-pdf/renderer, Vitest.
 
 ## Reglas
-- Toda la UI en español. Código y nombres de variables en inglés (campos del dominio en español donde replican la hoja física).
+- UI bilingüe con next-intl: inglés por defecto, español secundario (cookie `locale`). Todo texto de UI va en messages/en.json y messages/es.json — nunca hardcodeado. Mensajes de error de servidor/Zod en inglés. Código y nombres de variables en inglés (campos del dominio en español donde replican la hoja física).
 - Server Actions para mutaciones; validar SIEMPRE con Zod en el servidor (`safeParse`).
 - balanceDue nunca se guarda: se calcula como total - sum(payments) (`calcBalanceDueCents` en src/lib/money.ts).
 - Aritmética de dinero SIEMPRE en centavos enteros (src/lib/money.ts), nunca floats.

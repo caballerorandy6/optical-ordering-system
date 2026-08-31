@@ -5,7 +5,10 @@ import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { CustomerForm } from "@/components/customers/customer-form";
 
-export const metadata: Metadata = { title: "Editar cliente" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("editCustomer") };
+}
 
 export default async function EditarClientePage({
   params,

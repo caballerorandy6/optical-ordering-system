@@ -3,7 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/session";
 import { CustomerForm } from "@/components/customers/customer-form";
 
-export const metadata: Metadata = { title: "Nuevo cliente" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("newCustomer") };
+}
 
 export default async function NuevoClientePage() {
   await requireUser();

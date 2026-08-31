@@ -10,7 +10,7 @@ Order management system for optical shops: prescriptions (Rx), lenses, frames, c
 - **Better Auth** — credentials, DB sessions, ADMIN/STAFF roles, login rate limiting
 - **Zod 4** — shared client/server validation
 - **@react-pdf/renderer** — order PDF replicating the physical form
-- **next-intl** — bilingual UI (Spanish primary, English secondary)
+- **next-intl** — bilingual UI (English primary, Spanish secondary)
 - **Vitest** — unit tests for money/balance logic
 
 ## Getting started

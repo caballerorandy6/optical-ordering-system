@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { parseRange, getReportData } from "@/lib/reports";
-import { PAYMENT_METHODS } from "@/lib/catalogs";
 
 function csvEscape(value: string): string {
   if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
@@ -10,37 +10,44 @@ function csvEscape(value: string): string {
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return new Response("No autorizado", { status: 401 });
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
+  const [locale, t, tc] = await Promise.all([
+    getLocale(),
+    getTranslations("reports"),
+    getTranslations("catalogs"),
+  ]);
+  const intlLocale = locale === "es" ? "es-US" : "en-US";
 
   const url = new URL(request.url);
   const range = parseRange(
     url.searchParams.get("desde") ?? undefined,
     url.searchParams.get("hasta") ?? undefined
   );
-  const data = await getReportData(range);
+  const data = await getReportData(range, intlLocale);
 
   const rows = [
-    ["Fecha", "Folio", "Método", "Cobró", "Monto"],
+    [t("csvDate"), t("csvFolio"), t("csvMethod"), t("csvCollectedBy"), t("csvAmount")],
     ...data.payments.map((p) => [
-      new Intl.DateTimeFormat("es-US", { dateStyle: "short", timeStyle: "short" }).format(
+      new Intl.DateTimeFormat(intlLocale, { dateStyle: "short", timeStyle: "short" }).format(
         p.fecha
       ),
       `#${p.order.folio}`,
-      PAYMENT_METHODS[p.metodo],
+      tc(`paymentMethods.${p.metodo}`),
       p.user.name,
       p.monto.toString(),
     ]),
   ];
 
   const csv = "﻿" + rows.map((r) => r.map(csvEscape).join(",")).join("\n");
-  const nombre = `pagos_${range.desde.toISOString().slice(0, 10)}_${range.hasta
+  const filename = `${t("csvFilePrefix")}_${range.desde.toISOString().slice(0, 10)}_${range.hasta
     .toISOString()
     .slice(0, 10)}.csv`;
 
   return new Response(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${nombre}"`,
+      "Content-Disposition": `attachment; filename="${filename}"`,
       "Cache-Control": "no-store",
     },
   });

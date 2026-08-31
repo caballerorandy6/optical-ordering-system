@@ -6,7 +6,10 @@ import { getSession } from "@/lib/session";
 import { LoginForm } from "@/app/login/login-form";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 
-export const metadata: Metadata = { title: "Iniciar sesión" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("signIn") };
+}
 
 export default async function LoginPage() {
   // Sesión verificada de verdad (no solo cookie): si es válida, a /ordenes

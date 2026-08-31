@@ -20,8 +20,8 @@ export function LocaleSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="Idioma / Language">
-      {(["es", "en"] as const).map((l) => (
+    <div className="flex items-center gap-1" role="group" aria-label="Language / Idioma">
+      {(["en", "es"] as const).map((l) => (
         <Button
           key={l}
           variant={locale === l ? "secondary" : "ghost"}

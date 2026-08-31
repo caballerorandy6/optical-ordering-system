@@ -11,13 +11,13 @@ export async function GET(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    return new Response("No autorizado", { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const { id } = await params;
   const detail = await getOrderDetail(id);
   if (!detail) {
-    return new Response("Orden no encontrada", { status: 404 });
+    return new Response("Order not found", { status: 404 });
   }
 
   const buffer = await renderToBuffer(
@@ -27,7 +27,7 @@ export async function GET(
   return new Response(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="orden-${detail.order.folio}.pdf"`,
+      "Content-Disposition": `inline; filename="order-${detail.order.folio}.pdf"`,
       "Cache-Control": "no-store",
     },
   });

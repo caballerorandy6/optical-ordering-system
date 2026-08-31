@@ -11,7 +11,7 @@ export async function addPayment(input: PaymentInput): Promise<ActionResult> {
   const user = await requireUser();
   const parsed = paymentSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
   const data = parsed.data;
 

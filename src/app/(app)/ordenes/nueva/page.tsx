@@ -4,7 +4,10 @@ import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { OrderForm } from "@/components/orders/order-form";
 
-export const metadata: Metadata = { title: "Nueva orden" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("newOrder") };
+}
 
 export default async function NuevaOrdenPage({
   searchParams,

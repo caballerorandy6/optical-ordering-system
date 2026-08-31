@@ -3,7 +3,7 @@
 /** "125.50" | 125.5 → 12550. Lanza si no es un monto válido. */
 export function toCents(value: string | number): number {
   if (typeof value === "string" && value.trim() === "") {
-    throw new Error("Monto inválido: cadena vacía");
+    throw new Error("Invalid amount: empty string");
   }
   const n = typeof value === "string" ? Number(value.trim()) : value;
   if (!Number.isFinite(n)) throw new Error(`Monto inválido: ${value}`);

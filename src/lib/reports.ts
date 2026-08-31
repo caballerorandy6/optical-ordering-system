@@ -14,7 +14,7 @@ export function parseRange(desde?: string, hasta?: string): DateRange {
   return { desde: start, hasta: end };
 }
 
-export async function getReportData(range: DateRange) {
+export async function getReportData(range: DateRange, intlLocale = "en-US") {
   const [payments, orders] = await Promise.all([
     prisma.payment.findMany({
       where: { fecha: { gte: range.desde, lte: range.hasta } },
@@ -39,7 +39,7 @@ export async function getReportData(range: DateRange) {
   // Cobrado por día
   const porDia = new Map<string, { count: number; totalCents: number }>();
   for (const p of payments) {
-    const key = new Intl.DateTimeFormat("es-US", { dateStyle: "medium" }).format(p.fecha);
+    const key = new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium" }).format(p.fecha);
     const entry = porDia.get(key) ?? { count: 0, totalCents: 0 };
     entry.count += 1;
     entry.totalCents += toCents(p.monto.toString());

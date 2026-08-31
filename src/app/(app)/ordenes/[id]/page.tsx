@@ -21,7 +21,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const metadata: Metadata = { title: "Orden" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return { title: t("order") };
+}
 
 const RX_COLS = [
   ["sphere", "Sphere"],

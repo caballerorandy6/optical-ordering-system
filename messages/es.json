@@ -233,7 +233,13 @@
     "noOrdersInRange": "Sin órdenes en el rango",
     "collectedByUser": "Cobrado por usuario",
     "user": "Usuario",
-    "totalCollected": "Total cobrado"
+    "totalCollected": "Total cobrado",
+    "csvDate": "Fecha",
+    "csvFolio": "Folio",
+    "csvMethod": "Método",
+    "csvCollectedBy": "Cobró",
+    "csvAmount": "Monto",
+    "csvFilePrefix": "pagos"
   },
   "config": {
     "title": "Configuración",
@@ -311,5 +317,20 @@
       "DISCOVER": "Discover",
       "DEBIT": "Débito"
     }
+  },
+  "meta": {
+    "appTitle": "Sistema de Órdenes — Óptica",
+    "appTemplate": "%s | Sistema de Órdenes",
+    "appDescription": "Sistema de órdenes para óptica: clientes, prescripciones, lentes, monturas, pagos y balances.",
+    "signIn": "Iniciar sesión",
+    "orders": "Órdenes",
+    "order": "Orden",
+    "newOrder": "Nueva orden",
+    "customers": "Clientes",
+    "customer": "Cliente",
+    "newCustomer": "Nuevo cliente",
+    "editCustomer": "Editar cliente",
+    "reports": "Reportes",
+    "settings": "Configuración"
   }
 }
