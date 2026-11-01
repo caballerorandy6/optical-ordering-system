@@ -22,7 +22,8 @@
     "notes": "Notas",
     "errorTitle": "Algo salió mal",
     "errorGeneric": "Ocurrió un error inesperado. Intenta de nuevo.",
-    "retry": "Intentar de nuevo"
+    "retry": "Intentar de nuevo",
+    "demoReadOnly": "Esta es una demo de solo lectura: puedes explorarla, pero los cambios no se guardan."
   },
   "nav": {
     "orders": "Órdenes",
@@ -43,7 +44,7 @@
     "signingIn": "Entrando...",
     "invalidCredentials": "Credenciales incorrectas. Verifica tu email y contraseña.",
     "demoTitle": "Cuentas de demostración",
-    "demoHint": "Toca una tarjeta para entrar directo, o escribe el usuario y contraseña arriba.",
+    "demoHint": "Toca una tarjeta para entrar directo, o escribe el usuario y contraseña arriba. Esta demo pública es de solo lectura.",
     "demoUser": "Usuario:",
     "demoPassword": "Contraseña:",
     "demoAdmin": "Administrador",

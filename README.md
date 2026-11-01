@@ -25,6 +25,10 @@ npm run dev
 
 Demo accounts: `admin@optica.local / Admin123!` (admin) · `maria@optica.local / Staff123!` (staff).
 
+## Read-only demo
+
+The sign-in page shows shared demo accounts, so on Vercel the app is read-only by default: Server Actions that write return an error, and Better Auth only answers sign-in, sign-out and get-session. Set `DEMO_READ_ONLY=0` for a real deployment, and remove the demo accounts from the sign-in page and the database first. Set `DEMO_READ_ONLY=1` to try read-only mode locally.
+
 ## Scripts
 
 | Command | Description |

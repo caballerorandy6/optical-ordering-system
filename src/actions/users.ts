@@ -3,11 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { demoWriteBlocked } from "@/lib/demo-guard";
 import { requireAdmin } from "@/lib/session";
 import { newUserSchema, type NewUserInput } from "@/lib/validations";
 import type { ActionResult } from "@/actions/customers";
 
 export async function createStaffUser(input: NewUserInput): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   await requireAdmin();
   const parsed = newUserSchema.safeParse(input);
   if (!parsed.success) {
@@ -33,6 +36,8 @@ export async function createStaffUser(input: NewUserInput): Promise<ActionResult
 }
 
 export async function setUserActive(userId: string, active: boolean): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   await requireAdmin();
   try {
     if (active) {

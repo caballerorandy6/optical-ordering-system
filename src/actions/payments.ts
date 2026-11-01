@@ -2,12 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { demoWriteBlocked } from "@/lib/demo-guard";
 import { requireUser, requireAdmin } from "@/lib/session";
 import { paymentSchema, type PaymentInput } from "@/lib/validations";
 import { calcBalanceDueCents, toCents } from "@/lib/money";
 import type { ActionResult } from "@/actions/customers";
 
 export async function addPayment(input: PaymentInput): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   const user = await requireUser();
   const parsed = paymentSchema.safeParse(input);
   if (!parsed.success) {
@@ -54,6 +57,8 @@ export async function addPayment(input: PaymentInput): Promise<ActionResult> {
 
 /** Los pagos son inmutables para STAFF: solo ADMIN corrige (elimina) un pago. */
 export async function deletePayment(paymentId: string): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   const admin = await requireAdmin();
   const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
   if (!payment) return { ok: false, error: "Pago no encontrado" };

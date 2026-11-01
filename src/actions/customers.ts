@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { demoWriteBlocked } from "@/lib/demo-guard";
 import { requireUser } from "@/lib/session";
 import { customerSchema, type CustomerInput } from "@/lib/validations";
 
@@ -20,6 +21,8 @@ function toCustomerData(data: CustomerInput) {
 }
 
 export async function createCustomer(input: CustomerInput): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   await requireUser();
   const parsed = customerSchema.safeParse(input);
   if (!parsed.success) {
@@ -31,6 +34,8 @@ export async function createCustomer(input: CustomerInput): Promise<ActionResult
 }
 
 export async function updateCustomer(id: string, input: CustomerInput): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   await requireUser();
   const parsed = customerSchema.safeParse(input);
   if (!parsed.success) {
