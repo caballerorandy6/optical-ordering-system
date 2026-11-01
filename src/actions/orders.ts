@@ -2,12 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { demoWriteBlocked } from "@/lib/demo-guard";
 import { requireUser, requireAdmin } from "@/lib/session";
 import { orderSchema, orderStatusSchema, type OrderInput } from "@/lib/validations";
 import { calcSubtotalCents, centsToDecimalString, toCents } from "@/lib/money";
 import type { ActionResult } from "@/actions/customers";
 
 export async function createOrder(input: OrderInput): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   const user = await requireUser();
   const parsed = orderSchema.safeParse(input);
   if (!parsed.success) {
@@ -125,6 +128,8 @@ export async function createOrder(input: OrderInput): Promise<ActionResult> {
 }
 
 export async function updateOrderStatus(orderId: string, estado: string): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   const user = await requireUser();
   const parsed = orderStatusSchema.safeParse(estado);
   if (!parsed.success) return { ok: false, error: "Invalid status" };
@@ -152,6 +157,8 @@ export async function updateOrderStatus(orderId: string, estado: string): Promis
 }
 
 export async function deleteOrder(orderId: string): Promise<ActionResult> {
+  const blocked = await demoWriteBlocked();
+  if (blocked) return blocked;
   const admin = await requireAdmin(); // STAFF no puede borrar órdenes
   const payments = await prisma.payment.count({ where: { orderId } });
   if (payments > 0) {

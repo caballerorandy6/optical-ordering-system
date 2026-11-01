@@ -22,7 +22,8 @@
     "notes": "Notes",
     "errorTitle": "Something went wrong",
     "errorGeneric": "An unexpected error occurred. Please try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "demoReadOnly": "This is a read-only demo: you can look around, but changes are not saved."
   },
   "nav": {
     "orders": "Orders",
@@ -43,7 +44,7 @@
     "signingIn": "Signing in...",
     "invalidCredentials": "Invalid credentials. Check your email and password.",
     "demoTitle": "Demo accounts",
-    "demoHint": "Tap a card to sign in directly, or type the username and password above.",
+    "demoHint": "Tap a card to sign in directly, or type the username and password above. This public demo is read-only.",
     "demoUser": "Username:",
     "demoPassword": "Password:",
     "demoAdmin": "Administrator",
